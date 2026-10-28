@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Image from "next/image";
+import QRCode from "qrcode";
 
 type Platform = {
   id: string;
@@ -43,6 +45,9 @@ export default function Home() {
   const [editing, setEditing] = useState<Platform | null>(null);
   const [visits, setVisits] = useState(0);
   const [error, setError] = useState("");
+  const [qrPng, setQrPng] = useState("");
+  const [qrSvg, setQrSvg] = useState("");
+  const [qrTarget, setQrTarget] = useState("");
 
   useEffect(() => {
     let restoredPlatforms = starterPlatforms;
@@ -58,6 +63,20 @@ export default function Home() {
     const frame = window.requestAnimationFrame(() => {
       setPlatforms(restoredPlatforms);
       setVisits(restoredVisits);
+      const target = `${window.location.origin}/portail`;
+      setQrTarget(target);
+      const qrOptions = {
+        errorCorrectionLevel: "H" as const,
+        margin: 3,
+        color: { dark: "#28513d", light: "#FFFFFF" },
+      };
+      Promise.all([
+        QRCode.toDataURL(target, { ...qrOptions, width: 720 }),
+        QRCode.toString(target, { ...qrOptions, type: "svg" }),
+      ]).then(([png, svg]) => {
+        setQrPng(png);
+        setQrSvg(svg);
+      });
     });
     return () => window.cancelAnimationFrame(frame);
   }, []);
@@ -136,7 +155,7 @@ export default function Home() {
         {!isAdmin ? <>
           <section className="hero" id="accueil"><div className="shell hero-layout">
             <div className="hero-copy"><p className="eyebrow"><span /> Votre écosystème numérique</p><h1>Un seul accès.<br /><em>Toutes nos solutions.</em></h1><p className="hero-description">Bienvenue sur DATASYS CONNECT. Retrouvez les plateformes numériques proposées par DATASYS et accédez au service qu’il vous faut.</p><a className="hero-cta" href="#plateformes">Explorer les plateformes <span>↓</span></a></div>
-            <aside className="hero-stamp"><div className="stamp-orbit"><span>D</span><i /><i /><i /></div><div className="stamp-caption"><span>DATASYS</span><strong>Un portail.<br />Vos services.</strong></div><span className="stamp-index">01 / CONNECT</span></aside>
+            <aside className="hero-qr" aria-label="QR code du portail DATASYS CONNECT"><div className="qr-heading"><span>ACCÈS DIRECT</span><strong>Scannez pour visiter</strong></div>{qrPng ? <Image className="qr-image" src={qrPng} alt="QR code pour ouvrir le portail DATASYS CONNECT" width={720} height={720} unoptimized /> : <div className="qr-placeholder" aria-hidden="true">Génération du QR…</div>}<p className="qr-target">{qrTarget}</p><div className="qr-downloads"><a href={qrPng || undefined} download="datasys-connect.png">PNG</a><a href={qrSvg ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvg)}` : undefined} download="datasys-connect.svg">SVG</a></div></aside>
           </div><div className="hero-foot shell"><span>Simple d’accès</span><span>Pensé pour mobile</span><span>Un écosystème évolutif</span><span className="hero-location">Bamako · Mali</span></div></section>
 
           <section className="services shell" id="plateformes"><div className="section-heading"><div><p className="eyebrow">L’écosystème DATASYS</p><h2>Choisissez votre service<span>.</span></h2></div><p className="section-note">Des solutions numériques conçues pour vous accompagner au quotidien.</p></div>
