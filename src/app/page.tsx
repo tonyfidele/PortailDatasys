@@ -63,12 +63,12 @@ export default function Home() {
     const frame = window.requestAnimationFrame(() => {
       setPlatforms(restoredPlatforms);
       setVisits(restoredVisits);
-      const target = `${window.location.origin}/portail`;
+      const target = "https://datasys.com/portail";
       setQrTarget(target);
       const qrOptions = {
         errorCorrectionLevel: "H" as const,
         margin: 3,
-        color: { dark: "#28513d", light: "#FFFFFF" },
+        color: { dark: "#003B70", light: "#FFFFFF" },
       };
       Promise.all([
         QRCode.toDataURL(target, { ...qrOptions, width: 720 }),
